@@ -1,10 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from score_history import Score
 from environment import Environment
 from mongodb import Database
 from actor_critic import Agent
 from print_module import Print
+
+'''Get score history'''
+Score()
 
 def plot_learning_curve(x, scores, figure_file):
     # Calculate the running average of the last 100 scores
@@ -33,13 +37,16 @@ if __name__ == '__main__':
     env = Environment(db)
     agent = Agent(env=env)
 
-    file_name = 'actor_critic.png'
+    file_name = 'score_history.png'
     figure_file = 'plots/' + file_name
 
     load_checkpoint = False
     best_score = 0
     score_history = []
 
+    '''Load the state'''
+    Print.success("Loading state...")
+    score_history, best_score = Score().load_state()
 
     users = db.users.find()
     users_ids = [str(user['_id']) for user in users]
@@ -77,8 +84,13 @@ if __name__ == '__main__':
                     best_score = avg_score
                     if not load_checkpoint:
                         agent.save_models()
+                        Print.success(f"Model saved")
 
                 print(f"Reward: {reward} | Score: {score} | Best Score: {best_score} | Avg Score: {avg_score}")
+            
+            Score().save_state(score_history, best_score)
+            Print.success(f"Score history saved")
+    
     Print.success("Training completed")
 
     '''Plot the learning curve'''

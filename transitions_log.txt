@@ -101,3 +101,7 @@ response như kiểu như này:
 }
 
 cái này t chỉ làm để kiếm tra xem store transition có ổn hay chưa thôi
+
+chạy celery:
+celery -A app.celery worker --pool=solo  --loglevel=info
+# t chạy app flask trên 1 terminal, celery 1 terminal khác

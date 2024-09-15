@@ -11,7 +11,7 @@ from keras.api.optimizers import Adam
 
 
 class Agent:
-    def __init__(self, alpha=0.0003, gamma=0.99, n_actions=2, env=None):
+    def __init__(self, alpha=0.0003, gamma=0.99, n_actions=485, env=None):
         self.gamma = gamma
         self.n_actions = env.action_space.n
         self.action = None
@@ -63,7 +63,6 @@ class Agent:
         self.actor_critic.optimizer.apply_gradients(
             zip(gradient, self.actor_critic.trainable_variables)
         )
-
 
 # agent = Agent(env=env)
 # state = [1, 0, 1, 0, 0, 1, 0, 0]
