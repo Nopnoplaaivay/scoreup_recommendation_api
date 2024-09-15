@@ -1,0 +1,79 @@
+gửi body request 1 dãy các câu vừa gợi ý để train model (T nghĩ tối đa nên là 10 bài tập thôi)
+Làm xong 10 câu sẽ lại chạy lại cái api lấy câu mới từ đầu
+
+Ví dụ làm xong bài 1 gợi ý bài 2 thì transition là bài 1 -> 2
+VD: [1->2] [2->3] ... [9->10]
+
+Sau khi thằng học làm xong 1 chuỗi 10 câu mình vừa gợi ý đó. Gọi api này rồi truyền body request như sau 
+để train model:
+
+{
+    "user_id": "669d16e11db84069209550bd",
+    "transitions": [
+        {
+            // State chứa exercise_id, difficulty, score, bookmarked, knowledge concept
+            // Trả về đúng thứ tự trên cho t
+
+            // Ví dụ đây là bài 1 -> bài 2
+            "state": [
+                "79f1fc83-d117-44dc-ab1c-6c1d7c02304b", // exercise_id
+                1, // độ khó
+                0, // điểm
+                1, // đánh dấu hay không (bookmarked)
+                "thong-tin-xu-ly-thong-tin" // phạm trù kiến thức (knowledge_concept)
+            ], 
+            "next_state": [
+                "3b6fd0b3-414b-464e-83f1-404d78be26c9",
+                0,
+                1,
+                0,
+                "thong-tin-xu-ly-thong-tin"
+            ],
+            "done": 0 // Đây không phải bài tập cuối cùng nên gán = 0
+        },
+        {
+            // Đây là bài 2 -> bài 3
+            "state": [
+                "3b6fd0b3-414b-464e-83f1-404d78be26c9",
+                0,
+                1,
+                0,
+                "thong-tin-xu-ly-thong-tin"
+            ], 
+            "state": [
+                "0304f6be-0591-419e-a6cb-c10db2c1cbeb",
+                0,
+                1,
+                1,
+                "thong-tin-xu-ly-thong-tin"
+            ],
+            "done": 0 // Tương tự chưa phải bài cuối cùng
+        }
+        ...
+        {
+            // Đây là bài 9 -> bài 10
+            "state": [
+                "0cfd0f1b-9317-478d-8e30-1d0bdca2453f",
+                0,
+                1,
+                0,
+                "thong-tin-xu-ly-thong-tin"
+            ],
+            "next_state": [
+                "0e65953d-a745-45c8-9b70-bc88333a5ca5",
+                1,
+                0,
+                1,
+                "may-tinh-dien-tu"
+            ],
+            "done": 1 // Nếu đây là bài cuối cùng, gón done = 1
+        }
+    ]
+}
+
+* Note: trong quá trình làm, thằng user có thể thoát ra không làm nữa, nếu nó làm được 1 transition,
+nghĩa là làm xong bài 1, nó được gợi ý bài 2, nó làm xong bài 2 (có score rồi) mà nó thoát ra thì cứ gửi 
+body request như trên cho t. Nếu m bắt được sự kiện đấy để làm gán giá trị cho thằng done thì ngon.
+VD: nó làm hết 10 câu mình gợi ý => done = 1, gửi về cho T
+    hoặc nó làm 1-2 transition, nghĩa là 2-3 bài liền mạch rồi thoát ra thì cũng gửi body request như
+    trên cho t.
