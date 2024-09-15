@@ -1,3 +1,14 @@
+API: http://127.0.0.1:8019/predict_action
+body request: 
+
+{
+  "state": [1, 0, 1, "mang-may-tinh"]
+}
+
+
+
+API: http://127.0.0.1:8019/store_transition
+
 gửi body request 1 dãy các câu vừa gợi ý để train model (T nghĩ tối đa nên là 10 bài tập thôi)
 Làm xong 10 câu sẽ lại chạy lại cái api lấy câu mới từ đầu
 
@@ -77,3 +88,16 @@ body request như trên cho t. Nếu m bắt được sự kiện đấy để l
 VD: nó làm hết 10 câu mình gợi ý => done = 1, gửi về cho T
     hoặc nó làm 1-2 transition, nghĩa là 2-3 bài liền mạch rồi thoát ra thì cũng gửi body request như
     trên cho t.
+
+Body request ví dụ t để trong: transition_log.json
+
+API: http://127.0.0.1:8019/get_memory
+
+api này trả về số transition của mỗi thằng user 
+response như kiểu như này:
+{
+  "669d16e11db84069209550bd": 10,
+  "66a51c3e0d1c2df2ef697e96": 5
+}
+
+cái này t chỉ làm để kiếm tra xem store transition có ổn hay chưa thôi
