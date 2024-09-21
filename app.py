@@ -4,7 +4,7 @@ import requests
 import os
 import json
 
-from flask import Flask, request, jsonify
+from flask import Flask, send_file, request, jsonify
 from flask_cors import CORS
 from collections import defaultdict, deque
 from environment import Environment
@@ -53,7 +53,6 @@ def store_transition():
     transitions = data["transitions"]
 
     for transition in transitions:
-
         """Prepare transition"""
         raw_state = transition["state"][1:]
         raw_next_state = transition["next_state"][1:]
@@ -135,8 +134,6 @@ def background_train(user_id, transitions_json):
 
 
 """Get status of training task"""
-
-
 @app.route("/status/<task_id>")
 def get_status(task_id):
     task = AsyncResult(task_id, app=celery)
@@ -171,8 +168,6 @@ def get_memory_by_user_id(user_id):
 
 
 """Predict action"""
-
-
 @app.route("/predict_action", methods=["POST"])
 def predict_action():
     data = request.json
@@ -184,6 +179,39 @@ def predict_action():
         return jsonify({"action": action, "exercise": exercise}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+'''Get first action'''
+@app.route("/initial_action", methods=["POST"])
+def initial_action():
+    data = request.json
+    try:
+        user_id = data["user_id"]
+        user_log = db.logs.find({"user_id": user_id}).sort("timestamp", -1).limit(1)[0]
+        state = env.extract_state(user_log)[1]
+        
+        action = int(agent.choose_action(state))
+        exercise = db.questions.find_one({"encoded_exercise_id": action})
+        return jsonify({"action": action, "exercise": exercise}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+'''Get score_history.png'''
+@app.route("/score_history", methods=["GET"])
+def score_history():
+    try:
+        return send_file("plots/score_history.png", mimetype="image/png")
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+'''Run offline_traine.py'''
+@app.route("/offline_train", methods=["GET"])
+def offline_train():
+    try:
+        os.system("python offline_train.py")
+        return jsonify({"status": "success", "message": "Training completed"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 
 
 """Run Flask app"""

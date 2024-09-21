@@ -8,7 +8,7 @@ from actor_critic import Agent
 from print_module import Print
 
 '''Get score history'''
-Score()
+Score().delete_state()
 
 def plot_learning_curve(x, scores, figure_file):
     # Calculate the running average of the last 100 scores
@@ -26,7 +26,7 @@ def plot_learning_curve(x, scores, figure_file):
 
     # Save the plot to the specified file
     plt.savefig(figure_file)
-    plt.show()
+    # plt.show()
 
 if __name__ == '__main__':
 

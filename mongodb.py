@@ -9,7 +9,6 @@ from print_module import Print
 
 load_dotenv()
 
-
 class Database:
     def __init__(self, course_id="c3a788eb31f1471f9734157e9516f9b6"):
         # self.client = MongoClient(os.getenv("LOCAL_MONGO_URL"))
@@ -126,7 +125,6 @@ class Database:
             )
         Print.success("Difficulties for logs updated successfully!")
 
-
     def reset_logs(self):
         exercise_ids = self.action_space
         logs_exer_ids = [log["exercise_id"] for log in self.logs.find()]
@@ -136,8 +134,14 @@ class Database:
                 self.logs.delete_one({"exercise_id": log_exer_id})
         Print.success("Logs reset successfully!")
 
+    def latest_user_log(self, user_id):
+        user_logs = self.logs.find({"user_id": user_id}).sort("timestamp", -1)
+        return user_logs[0]
+
+
 # db = Database()
 # db.check_connection()
+# print(db.latest_user_log("669d16e11db84069209550bd"))
 # db.encode_knowledge_concepts()
 # db.update_log_knowledge_concepts()
 # db.encode_exercise_ids()
