@@ -1,47 +1,28 @@
-import numpy as np
 import random
 
-from collections import deque
-from datetime import datetime
-from mongodb import Database
+from model.mongodb import Database
 
 class Actions:
-    def __init__(self, action_space) -> None:
+    def __init__(self, db) -> None:
 
-        self.actions = action_space
+        self.actions = db.action_space
         self.n = len(self.actions)
-
-    def sample(self):
-        return random.randint(0, self.n - 1)
-
 
 class observation_space:
     def __init__(self, n) -> None:
         self.shape = (n,)
 
 class Environment:
-    def __init__(self, db) -> None:
-
+    '''Khởi tạo môi trường học tập với chương hiện tại'''
+    def __init__(self, db, cur_chapter) -> None:
         self.db = db
+        self.db.update_action_space(cur_chapter=cur_chapter)
         self.observation_space = observation_space(8)
-        self.action_space = Actions(db.action_space)
-        self.memory = deque(maxlen=10000)
+        self.action_space = Actions(db)
+        self.actions = [self.get_action(action) for action in self.db.action_space]
+        self.cur_chapter = cur_chapter
 
-    # def reset(self, user_id):
-    #     user_log = self.db.logs.aggregate([
-    #         {"$match": {"user_id": user_id}},
-    #         {"$sample": {"size": 1}}
-    #     ])
-    #     metadata = list(user_log)[0]
-    #     exercise_id = metadata["exercise_id"]
-    #     difficulty = metadata["difficulty"]
-    #     knowledge_concept = metadata["knowledge_concept"]
-    #     score = metadata["score"]
-    #     bookmarked = metadata["bookmarked"] if "bookmarked" in metadata else 0
-    #     initial_state = [difficulty, knowledge_concept, score, bookmarked]
-
-    #     return exercise_id, initial_state
-
+    '''1. Hàm phần thưởng'''
     def reward_func(self, state, next_state):
 
         '''Prepare state'''
@@ -68,6 +49,7 @@ class Environment:
 
         return 0.4 * R1 + 0.4 * R2 + 0.2 * R3
 
+    '''2. Trích xuất state từ log'''
     def extract_state(self, log):
         exercise_id = log["exercise_id"]
         difficulty = log["difficulty"]
@@ -83,6 +65,7 @@ class Environment:
 
         return exercise_id, state
     
+    '''3. Trích xuất state từ body request của API'''
     def convert_state(self, raw_state):
         difficulty = raw_state[0]
         score = raw_state[1]
@@ -97,13 +80,16 @@ class Environment:
 
         return state
     
+    '''4. Lấy action từ exercise_id'''
     def get_action(self, exercise_id):
         action = self.db.questions.find_one({"_id": exercise_id})["encoded_exercise_id"]
         return action
     
+    '''5. Lấy exercise_id từ action'''
     def get_exercise_by_action(self, action):
         exercise_id = self.db.questions.find_one({"encoded_exercise_id": action})["_id"]
         return exercise_id
 
-# env = Environment(db)
-# print(env.get_action("0cbc7892-391b-48be-a850-46f00e175c82"))
+# env = Environment(Database(), "chuong-2")
+# print(env.action_space.actions)
+# print(env.action_space.n)
