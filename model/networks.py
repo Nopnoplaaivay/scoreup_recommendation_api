@@ -20,10 +20,13 @@ class ActorCriticNetwork(keras.Model):
         n_actions=81,
         cur_chapter="chuong-1",
         name="actor_critic",
+        trainable=True,
+        dtype=None,
         checkpoint_dir="tmp/actor_critic",
+        **kwargs
     ):
-        super(ActorCriticNetwork, self).__init__()
-
+        super(ActorCriticNetwork, self).__init__(trainable=trainable, dtype=dtype, **kwargs)
+        self.trainable = trainable
         self.model_name = name
         self.cur_chapter = cur_chapter
         self.checkpoint_dir = checkpoint_dir
@@ -64,6 +67,23 @@ class ActorCriticNetwork(keras.Model):
 
         return v, pi
     
+    def get_config(self):
+        # Provide the configuration needed to recreate the model
+        config = super(ActorCriticNetwork, self).get_config()
+        config.update({
+            'n_actions': self.n_actions,
+            'cur_chapter': self.cur_chapter,
+            'name': self.model_name,
+            'checkpoint_dir': self.checkpoint_dir,
+            'trainable': self.trainable,  # Add trainable to config
+            'dtype': self.dtype_policy.name  # Include dtype in the config
+        })
+        return config
+    
+    @classmethod
+    def from_config(cls, config):
+        # Create an instance of ActorCriticNetwork from the config
+        return cls(**config)
 
 # actor_critic = ActorCriticNetwork(n_actions=485)
 # state = [0, 1, 0, 0, 0, 0, 0, 1]
