@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    command: python3 app.py
+    ports:
+      - "8019:8019"
+    environment:
+      - REDIS_URL=redis://:21012004Viet@101.96.66.218:8002/0
+    volumes:
+      - .:/src
+
+  worker:
+    build: .
+    command: rq worker --with-scheduler --url redis://:21012004Viet@101.96.66.218:8002/0 task_queue
+    environment:
+      - REDIS_URL=redis://:21012004Viet@101.96.66.218:8002/0
+    volumes:
+      - .:/src
