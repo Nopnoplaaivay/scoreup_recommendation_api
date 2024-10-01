@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, request, jsonify
 from rq import Queue
 from redis import Redis
@@ -14,7 +16,7 @@ agent = Agent(env=env)
 agent.load_models()
 onl_memory = OnlineMemory(env=env)
 
-redis_conn = Redis(host='101.96.66.218', port=8002, db=0, password='21012004Viet')
+redis_conn = Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0, password=os.getenv("REDIS_PASSWORD"))
 task_queue = Queue("task_queue", connection=redis_conn)
 
 train_bp = Blueprint('train', __name__)
@@ -24,8 +26,6 @@ def train():
     global env, agent, onl_memory
     req = request.json
     cur_chapter = req["chapter"]
-    user_id = req["user_id"]
-    transitions = req["transitions"]
 
     '''Update ENV'''
     if cur_chapter != env.cur_chapter:
