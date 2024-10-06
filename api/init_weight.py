@@ -35,6 +35,6 @@ def history_train():
 def score_plot(cur_chapter):
     global init_weight_agent
     try:
-        return send_file(f"plots/score_history_c{cur_chapter.split('-')[-1]}.png", mimetype="image/png")
+        return send_file(f"plots/score_history_{cur_chapter}.png", mimetype="image/png")
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
