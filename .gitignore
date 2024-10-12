@@ -4,3 +4,5 @@ trash/
 tempCodeRunnerFile.py
 .env
 test.ipynb
+/tmp/actor_critic/*
+/plots/*

@@ -31,21 +31,33 @@ def recommend_action():
             raw_state = data["state"]
             state = env.convert_state(raw_state)
             action = int(agent.choose_action(state))
+            exercise_id = env.get_exercise_by_action(action)
+
+            rec_message = db.get_exercise_message(exercise_id, user_id)
+            rec_message = rec_message["message"] if rec_message else None
+
             exercise = db.questions.find_one({"encoded_exercise_id": action})
-            return jsonify({"action": action, "exercise": exercise}), 200
+            return jsonify({"action": action, "exercise": exercise, "rec_message": rec_message}), 200
         else:
+            print("No state provided, extracting from logs")
             chapters_num = cur_chapter.split("-")[-1]
             chapters = [f"chuong-{i}" for i in range(1, int(chapters_num) + 1)]
             user_log_cursor = db.logs.find({"user_id": user_id, "chapter": {"$in": chapters}}).sort("timestamp", -1).limit(1)
             user_logs = list(user_log_cursor)
+            print(user_logs)
             if not user_logs:
                 raise ValueError("No logs found for the given user and chapters")
 
             user_log = user_logs[0]
             state = env.extract_state(user_log)[1]
             action = int(agent.choose_action(state))
+            exercise_id = env.get_exercise_by_action(action)
+
+            rec_message = db.get_exercise_message(exercise_id, user_id)
+            rec_message = rec_message["message"] if rec_message else None
+
             exercise = db.questions.find_one({"encoded_exercise_id": action})
-            return jsonify({"action": action, "exercise": exercise}), 200
+            return jsonify({"action": action, "exercise": exercise, "rec_message": rec_message}), 200
     except KeyError as e:
         return jsonify({"status": "error", "message": f"Missing key in request data: {str(e)}"}), 400
     except ValueError as e:

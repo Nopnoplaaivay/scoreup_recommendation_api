@@ -167,13 +167,7 @@ class Database:
                 self.logs.delete_one({"exercise_id": log_exer_id})
         Print.success("Logs reset successfully!")
 
-    """8. Lấy log mới nhất của người dùng"""
-
-    def latest_user_log(self, user_id):
-        user_logs = self.logs.find({"user_id": user_id}).sort("timestamp", -1)
-        return user_logs[0]
-
-    """9. Update chapter cho logs"""
+    """8. Update chapter cho logs"""
 
     def update_chapter(self):
         logs = self.logs.find()
@@ -183,3 +177,36 @@ class Database:
             chapter = question["chapter"]
             self.logs.update_one({"_id": log["_id"]}, {"$set": {"chapter": chapter}})
         Print.success("Chapters for logs updated successfully!")
+
+    """9. Update knowledge concepts cho logs"""
+    def get_exercise_message(self, exercise_id, user_id):
+        # Check if user has answered the question before
+        try:
+            log = self.logs.find_one({"exercise_id": exercise_id, "user_id": user_id})
+            if log:
+                # Check if log has bookmarked
+                if "bookmarked" in log:
+                    bookmarked = log["bookmarked"]
+                    if bookmarked:
+                        return {"message": "bookmarked"}
+                # Check if user has answered the question correctly
+                elif "score" in log:
+                    score = log["correct_ans"]
+                    if score == 0:
+                        return {"message": "incorrect"}
+                    else:
+                        return {"message": "correct"} 
+            else:
+                # Get difficulty of the question
+                question = self.questions.find_one({"_id": exercise_id})
+                difficulty = question["difficulty"] if question["difficulty"] else 0
+                if difficulty >= 0.5:
+                    return {"message": "difficult"}
+                else:
+                    return {"message": "easy"}
+        except Exception as e:
+            print(e)
+            return {"message": None}
+        
+
+        

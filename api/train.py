@@ -31,7 +31,6 @@ def train():
     if cur_chapter != env.cur_chapter:
         env = Environment(db, cur_chapter=cur_chapter)
         agent = Agent(env=env)
-        agent.load_models()
 
     '''Add transition to Memory'''
     onl_memory.process_transitions(req)

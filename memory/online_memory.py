@@ -6,8 +6,8 @@ from model.environment import Environment
 
 class OnlineMemory:
     def __init__(self, env):
-        self.batch = []
-        self.memory = {}
+        # self.memory = {}
+        self.batch = []  
         self.env = env
 
     def process_transitions(self, req):
@@ -16,10 +16,10 @@ class OnlineMemory:
         user_id = req["user_id"]
         transitions = req["transitions"]
 
-        if cur_chapter not in self.memory:
-            self.memory[cur_chapter] = {}
-        if user_id not in self.memory:
-            self.memory[cur_chapter][user_id] = {"scores": [], "best_score": 0}
+        # if cur_chapter not in self.memory:
+        #     self.memory[cur_chapter] = {}
+        # if user_id not in self.memory:
+        #     self.memory[cur_chapter][user_id] = {"scores": [], "best_score": 0}
 
         '''Process transitions'''
         for transition in transitions:
