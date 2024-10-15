@@ -192,7 +192,7 @@ class Database:
                         return {"message": "bookmarked"}
                 # Check if user has answered the question correctly
                 elif "score" in log:
-                    score = log["correct_ans"]
+                    score = log["score"]
                     if score == 0:
                         return {"message": "incorrect", "created_at": created_at}
                     else:
