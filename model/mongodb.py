@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from dotenv import load_dotenv
 from utils.print_module import Print
 
@@ -182,8 +182,9 @@ class Database:
     def get_exercise_message(self, exercise_id, user_id):
         # Check if user has answered the question before
         try:
-            log = self.logs.find_one({"exercise_id": exercise_id, "user_id": user_id})
+            log = self.logs.find_one({"exercise_id": exercise_id, "user_id": user_id}, sort=[("created_at", DESCENDING)])
             if log:
+                created_at = log["created_at"]
                 # Check if log has bookmarked
                 if "bookmarked" in log:
                     bookmarked = log["bookmarked"]
@@ -193,17 +194,17 @@ class Database:
                 elif "score" in log:
                     score = log["correct_ans"]
                     if score == 0:
-                        return {"message": "incorrect"}
+                        return {"message": "incorrect", "created_at": created_at}
                     else:
-                        return {"message": "correct"} 
+                        return {"message": "correct", "created_at": created_at} 
             else:
                 # Get difficulty of the question
                 question = self.questions.find_one({"_id": exercise_id})
                 difficulty = question["difficulty"] if question["difficulty"] else 0
                 if difficulty >= 0.5:
-                    return {"message": "difficult"}
+                    return {"message": "difficult", "value": difficulty}
                 else:
-                    return {"message": "easy"}
+                    return {"message": "easy", "value": difficulty}
         except Exception as e:
             print(e)
             return {"message": None}

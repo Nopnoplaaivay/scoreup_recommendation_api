@@ -34,7 +34,7 @@ def recommend_action():
             exercise_id = env.get_exercise_by_action(action)
 
             rec_message = db.get_exercise_message(exercise_id, user_id)
-            rec_message = rec_message["message"] if rec_message else None
+            rec_message = rec_message if rec_message else None
 
             exercise = db.questions.find_one({"encoded_exercise_id": action})
             return jsonify({"action": action, "exercise": exercise, "rec_message": rec_message}), 200
@@ -44,7 +44,7 @@ def recommend_action():
             chapters = [f"chuong-{i}" for i in range(1, int(chapters_num) + 1)]
             user_log_cursor = db.logs.find({"user_id": user_id, "chapter": {"$in": chapters}}).sort("timestamp", -1).limit(1)
             user_logs = list(user_log_cursor)
-            print(user_logs)
+            # print(user_logs)
             if not user_logs:
                 raise ValueError("No logs found for the given user and chapters")
 
@@ -54,7 +54,7 @@ def recommend_action():
             exercise_id = env.get_exercise_by_action(action)
 
             rec_message = db.get_exercise_message(exercise_id, user_id)
-            rec_message = rec_message["message"] if rec_message else None
+            rec_message = rec_message if rec_message else None
 
             exercise = db.questions.find_one({"encoded_exercise_id": action})
             return jsonify({"action": action, "exercise": exercise, "rec_message": rec_message}), 200
